@@ -24,7 +24,6 @@
     "nock": "~0.13.5"
   },
   "bin": {
-    "bower": "bin/bower",
     "http" : "bin/http"
   },
   "preferGlobal": true
