@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+
+program.version('0.0.1')
+  .option('-r, --root', 'root path')
+  .parse(process.argv);
+
+var rootpath = program.root || process.cwd();
+
+var http = require('http');
+var url  = require('url');
+var fs   = require('fs');
+var path = require('path');
+
+var srv = http.createServer(function(req, res) {
+
+  var urlpath = url.parse(req.url).path;
+
+  var fspath = path.resolve(rootpath, urlpath);
+
+  //ignore favicon.ico request
+  if(/favicon/.test(fspath))return;
+
+  fs.stat(fspath, function(err, stats) {
+
+    //return error info to client
+    if(err){
+      res.end(err + '');
+      return;
+    }
+
+    //list directory
+    if(stats.isDirectory()){
+      fs.readdir(fspath, function(err, files){
+        //error listing directory
+        if(err){
+          res.end(err + '');
+          return;
+        }
+        //link to parent folder
+        res.write('<a href="' + urlpath.replace(/[^\/]+\/?$/, '') + '">..</a><br/>');
+
+        //list directory
+        for(i in files){
+          var href = urlpath + (/\/$/.test(path) ? '' : '/') + files[i];
+          href = href.replace('//', '/');//fix issue with root dir listing
+          res.write('<a href="' + href + '">' + files[i] + '</a><br/>');
+        }
+        res.end();
+      });
+    }
+
+    //download file
+    if(stats.isFile()){
+      var name = fspath.substring(fspath.lastIndexOf('/') + 1);
+      if(!/css|js|html|txt|md/.test(name)){
+        res.setHeader('Content-Disposition', 'attachment;filename=' + name);
+      }
+      fs.createReadStream(fspath).pipe(res);
+    }
+  });
+});
+
+srv.listen(3000);
