@@ -1,0 +1,39 @@
+#!/usr/bin/env node
+
+var http = require('http')
+	, fs   = require('fs')
+	, crypto = require('crypto');
+
+
+var srv = http.createServer(function(req, resp) {
+	var hash = crypto.createHash('md5');
+	hash.update(req.url);
+	var md5 = hash.digest('hex');
+	var path = './' + md5;
+
+	console.log('http request : url=%s, path=%s', req.url, path);
+	fs.exists(path, function(exists) {
+		if(exists) {
+			fs.createReadStream(path).pipe(resp, {end: true});
+			return;
+		}
+		//if not exist : 
+		var params = {hostname: '10.1.136.35', port: '80', path: req.url, headers: {'Host': 'epman101.epdev1.lan'}};
+		console.log('request remote host : %s', params);
+		http.request(params, function(res) {
+			res.pipe(fs.createWriteStream(path), {end: true});
+			res.on('end', function() {
+				fs.createReadStream(path).pipe(resp, {end: true});
+				return;
+			});
+		}).end();
+	});
+});
+
+srv.on('error', function(e) {
+  if(e.code == 'EADDRINUSE') {
+    console.log('port 80 is already in use');
+  }
+});
+
+srv.listen(80);
