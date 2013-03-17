@@ -16,6 +16,7 @@
     "commander": "~1.1.0",
     "request": "2.9.x",
     "xml2js": "0.2.6",
+    "express": "3.0.x",
     "tar": "~0.1.13"
   },
   "scripts": {

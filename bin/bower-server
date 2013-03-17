@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+
+var express = require('express');
+    https = require('https');
+
+var app = express();
+
+app.get('/packages', function(req, resp) {
+  resp.json(app.get('packages'));
+});
+
+app.get('/packages/:name', function(req, resp) {
+  var packages = app.get('packages');
+  var item = null;
+  packages.forEach(function(e) {
+    if(e.name == req.params.name) { item = e;}
+  });
+  resp.json(item);
+});
+
+app.get('/packages/search/:name', function(req, resp) {
+  resp.end(JSON.stringify({error: 'not implemented'}));
+});
+
+https.request({hostname: 'bower.herokuapp.com', path: '/packages'}, function(res) {
+  var str = '';
+  res.on('data', function(chunk) { str += chunk;});
+  res.on('end', function() {
+    var packages = JSON.parse(str);
+    packages.forEach(function(e) {
+      e.url = e.url.replace('git:', 'https:');
+    });
+    app.set('packages', packages);
+  });
+}).end();
+
+app.listen(8028);
