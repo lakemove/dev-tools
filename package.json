@@ -14,6 +14,8 @@
   },
   "dependencies": {
     "commander": "~1.1.0",
+    "request": "2.9.x",
+    "xml2js": "0.2.6",
     "tar": "~0.1.13"
   },
   "scripts": {
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "mocha": "~1.6.0",
+    "request": "2.9.x",
     "nock": "~0.13.5"
   },
   "bin": {
