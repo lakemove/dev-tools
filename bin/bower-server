@@ -19,7 +19,13 @@ app.get('/packages/:name', function(req, resp) {
 });
 
 app.get('/packages/search/:name', function(req, resp) {
-  resp.end(JSON.stringify({error: 'not implemented'}));
+  var packages = app.get('packages');
+  var item = [];
+  packages.forEach(function(e) {
+    if(e.name == req.params.name) { item.push(e);}
+  });
+  resp.json(item);
+  //resp.end(JSON.stringify({error: 'not implemented'}));
 });
 
 https.request({hostname: 'bower.herokuapp.com', path: '/packages'}, function(res) {
